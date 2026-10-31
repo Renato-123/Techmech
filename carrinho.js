@@ -23,7 +23,8 @@
             TECHMECH10: { percentual: 0.10, texto: '10% de desconto' },
             BEMVINDO5:  { percentual: 0.05, texto: '5% de desconto' },
             GAMER15:    { percentual: 0.15, texto: '15% de desconto' },
-            VICTHORSUPERGAY: { percentual: 1.00, texto: '67% de desconto' }
+            VICTHORSUPERGAY: { percentual: 1.00, texto: '67% de desconto' },
+           LUISGOON: { percentual: 0.60, texto: '69% de desconto' }
         },
 
         // frete grátis automático acima deste valor (nas opções com frete)
