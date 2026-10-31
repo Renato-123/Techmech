@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="carrinho.css">
+    <style>
+        .rodape { text-align: center; padding: 40px 16px 110px; }
+        .link-admin { color: var(--text-faint); font-size: .85rem; padding: 6px 12px; border-radius: 8px; transition: color .25s; }
+        .link-admin:hover { color: var(--text-soft); }
+        .link-admin:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+        #login-admin { margin: auto; width: min(380px, calc(100% - 28px)); padding: 28px; color: var(--text); background: var(--bg-2); border: 1px solid var(--stroke-strong); border-radius: 18px; box-shadow: var(--shadow-2); }
+        #login-admin::backdrop { background: rgba(3, 4, 10, .72); backdrop-filter: blur(4px); }
+        #login-admin h2 { font-family: var(--font-display); font-size: 1.4rem; margin-bottom: 4px; }
+        #login-admin p { color: var(--text-soft); font-size: .92rem; margin-bottom: 18px; }
+        #login-admin input { width: 100%; padding: 12px 14px; font: inherit; color: var(--text); background: var(--bg-0); border: 1px solid var(--stroke); border-radius: 10px; }
+        #login-admin input:focus { outline: none; border-color: var(--accent); }
+        #login-admin input.erro { border-color: var(--danger); animation: login-tremer .4s; }
+        #login-msg { min-height: 1.4em; margin: 8px 0 14px; color: var(--danger); font-size: .88rem; }
+        .login-acoes { display: flex; gap: 10px; justify-content: flex-end; }
+        .login-acoes button { padding: 10px 18px; border-radius: 10px; font-weight: 600; background: var(--surface-hover); border: 1px solid var(--stroke); }
+        .login-acoes button[type="submit"] { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; color: #fff; }
+        @keyframes login-tremer { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+    </style>
+</head>
+<body>
+    <header class="topo-pagina">
+        <h1 class="title"><b>Techmech</b></h1>
+        <h3 class="resumo">Literalmente tudo</h3>
+    </header>
+
+    <!-- Os cards são criados automaticamente pelo script abaixo -->
+    <main class="products-grid" id="produtos"></main>
+
+    <footer class="rodape">
+        <button type="button" class="link-admin" id="abrir-admin">Área do administrador</button>
+    </footer>
+
+    <dialog id="login-admin" aria-labelledby="login-titulo">
+        <form id="login-form" method="dialog" autocomplete="off">
+            <h2 id="login-titulo">Área do administrador</h2>
+            <p>Digite a senha para abrir o painel de vendas.</p>
+            <input type="password" id="login-senha" placeholder="Senha" aria-label="Senha do administrador" autocomplete="current-password">
+            <div id="login-msg" role="alert"></div>
+            <div class="login-acoes">
+                <button type="button" id="login-cancelar">Cancelar</button>
+                <button type="submit">Entrar</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script src="auth.js"></script>
+
+    <script src="carrinho.js"></script>
+    <script>
+        const K = "https://images.kabum.com.br/produtos/fotos/";
+        const P = "https://media.pichau.com.br/media/catalog/product/cache/2f958555330323e505eba7ce930bdf27/";
+
+        // Para adicionar um produto, basta incluir uma linha aqui: [categoria, nome, preço antigo, preço atual, imagem]
+        const produtos = [
+            ["Placa de vídeo", "RTX 5090", "33.999", "33.000", K + "714560/placa-de-video-rtx-5090-aorus-master-ice-32g-gigabyte-nvidia-geforce-32gb-gddr7-512bits-rgb-dlss-ray-tracing-9vn5090ami-00-g10_1740416478_gg.jpg"],
+            ["Placa de vídeo", "ROG Astral RTX 5090 OC", "39.999", "37.500", K + "700804/placa-de-video-rog-astral-gaming-geforce-rtx5090-oc-nvidia-32gb-gddr7-argb-90yv0lw0-m0na00_1737724637_original.jpg"],
+            ["Placa de vídeo", "MSI RTX 5070 Ti Ventus 3X OC", "9.499", "8.683", K + "714419/placa-de-video-msi-geforce-rtx-5070-ti-16g-ventus-3x-oc-nvidia-16gb-gddr7-ate-2497mhz-g507t-16v3c_1739889552_original.jpg"],
+            ["Placa de vídeo", "RTX 4070 Ti Super Windforce 16GB", "7.999", "7.299", K + "517739/placa-de-video-rtx-4070-ti-super-gigabyte-windforce-nvidia-geforce-16gb-gddr6-dlss-ray-tracing-gv-n407tswf3-16gd_1706015557_original.jpg"],
+            ["Placa de vídeo", "ROG Strix RTX 4070 Ti 12GB", "7.499", "6.844", K + "403370/placa-de-video-rtx-4070-ti-rog-strix-gaming-asus-nvidia-geforce-12-gb-gddr6x-argb-ray-tracing-90yv0ii0-m0na00_1672840406_original.jpg"],
+            ["Placa de vídeo", "RTX 5060 Ti Windforce 8GB", "3.499", "2.999", K + "802430/placa-de-video-rtx-5060-ti-windforce-8g-gigabyte-nvidia-geforce-8gb-gddr7-128bits-dlss-ray-tracing-gv-n506twf2-8gd_1751045771_original.jpg"],
+            ["Placa de vídeo", "RTX 4060 ASUS Dual EVO 8GB", "2.799", "2.399", K + "522531/placa-de-video-rtx-4060-asus-dual-o8g-evo-nvidia-geforce-8gb-gddr6-g-sync-ray-tracing-90yv0jc7-m0na00_1711036187_original.jpg"],
+            ["Placa de vídeo", "RTX 3060 Gaming OC 8GB", "2.599", "2.299", K + "475652/placa-de-video-rtx-3060-gaming-oc-8g-gigabyte-nvidia-geforce-8gb-gddr6-128bits-ray-tracing-gv-n3060gaming-oc-8gd_1695647509_original.jpg"],
+            ["Placa de vídeo", "RTX 3060 Ti Dual OC ASUS 8GB", "3.499", "2.999", K + "432715/placa-de-video-rtx-3060-ti-dual-oc-asus-nvidia-geforce-8-gb-gddr6x-dlss-ray-tracing-dual-rtx3060ti-o8gd6x_1678193263_original.jpg"],
+            ["Placa de vídeo", "RTX 4070 Ti EX Gamer V2 Galax 12GB", "5.299", "4.499", K + "474949/placa-de-video-rtx-4070-ti-ex-gamer-v2-galax-nvidia-geforce-12gb-gddr6x-argb-dlss-ray-tracing-g-sync-47iom7md7adt_1691419842_original.jpg"],
+            ["Placa de vídeo", "RTX 5070 Windforce SFF 12GB Gigabyte", "5.199", "4.699", K + "726401/placa-de-video-rtx-5070-windforce-sff-12g-gigabyte-nvidia-geforce-12gb-gddr7-192bits-dlss-ray-tracing-9vn5070w-00-g10_1743160226_original.jpg"],
+            ["Placa de vídeo", "RTX 4070 Ti ST Galax", "7.499", "6.999", K + "404447/placa-de-video-rtx-4070-ti-st-pci-e-galax-16-gb-gddr6x-256bit-47iom7md6tts_1672845537_original.jpg"],
+            ["Placa de vídeo", "GTX 1050 Ti PCYes Low Profile 4GB", "999", "799", K + "514808/placa-de-video-gtx-1050-ti-pcyes-low-profile-nvidia-geforce-4gb-gddr5-128bits-graffiti-series-pvgtx1050tilp4gb_1708523076_original.jpg"],
+            ["Placa de vídeo", "RTX 4070 Ti TUF Gaming ASUS 12GB", "7.999", "6.999", K + "419115/placa-de-video-rtx-4070-ti-asus-tuf-gaming-nvidia-geforce-12-gb-gddr6x-argb-dlss-ray-tracing-tuf-rtx4070ti-12g-gaming_1677256824_original.jpg"],
+            ["Placa de vídeo", "RTX 5060 Ti Gaming OC 8GB Gigabyte", "3.799", "3.299", "https://images6.kabum.com.br/produtos/fotos/802426/placa-de-video-rtx-5060-ti-gaming-oc-8g-gigabyte-nvidia-geforce-8gb-gddr7-128bits-dlss-ray-tracing-gv-n506tgaming-oc-8gd_1775736425_g.jpg"],
+            ["Placa de vídeo", "RTX 5060 Ti Shadow 2X OC Plus 16GB MSI", "5.699", "5.151", "https://images1.kabum.com.br/produtos/fotos/sync_mirakl/900231/large/Placa-De-Video-Msi-Geforce-RTX-5060-Ti-16gb-Shadow-2x-Oc-Plus-Gddr7-912-v535-029_1752261278.jpg"],
+            ["Placa de vídeo", "RTX 5060 Ti EX Gamer White 8GB Galax", "5.499", "4.916", "https://images6.kabum.com.br/produtos/fotos/sync_mirakl/939796/large/Placa-De-Video-Galax-Geforce-RTX-5060-Ti-Ex-Gamer-Classic-White-8GB-Gddr7-128-Bits-56isn8md7kwc_1760990905.jpg"],
+            ["Placa de vídeo", "RTX 4070 Ti Super EX Gamer OC 16GB Galax", "8.499", "7.636", P + "4/7/47uzm6md9bup5.jpg"],
+            ["Placa de vídeo", "RTX 4070 Ti Super Gaming OC 16GB Gigabyte", "8.499", "7.647", P + "g/v/gv-n407tsgaming-oc-16gd3.jpg"],
+            ["Processador", "AMD Ryzen 7 7800X3D", "3.999", "1.849", K + "426262/processador-amd-ryzen-7-7800x3d-5-0ghz-max-turbo-cache-104mb-am5-8-nucleos-video-integrado-100-100000910wof_1680784502_original.jpg"],
+            ["Processador", "AMD Ryzen 7 7700X", "2.499", "1.899", "https://images3.kabum.com.br/produtos/fotos/378413/processador-amd-ryzen-7-7700x-5-4ghz-max-turbo-cache-40mb-am5-8-nucleos-video-integrado-100-100000591wof_1662136328_g.jpg"],
+            ["Processador", "AMD Ryzen 9 7900X", "3.199", "2.399", "https://images2.kabum.com.br/produtos/fotos/378412/processador-amd-ryzen-9-7900x-5-6ghz-max-turbo-cache-76mb-am5-12-nucleos-video-integrado-100-100000589wof_1662134312_g.jpg"],
+            ["Processador", "AMD Ryzen 9 7950X", "6.499", "5.499", "https://images1.kabum.com.br/produtos/fotos/378411/processador-amd-ryzen-9-7950x-5-7ghz-max-turbo-cache-80mb-am5-16-nucleos-video-integrado-100-100000514wof_1662132759_g.jpg"],
+            ["Processador", "AMD Ryzen 7 5800X3D", "2.499", "2.049", "https://images8.kabum.com.br/produtos/fotos/1053828/processador-amd-ryzen-7-5800x3d-3-4ghz-8-core-cache-100mb-am4-100-100000651pof_1784051518_g.jpg"],
+            ["Processador", "AMD Ryzen 5 7600X", "1.499", "1.089", "https://images4.kabum.com.br/produtos/fotos/378414/processador-amd-ryzen-5-7600x-5-3ghz-max-turbo-cache-38mb-am5-6-nucleos-video-integrado-100-100000593wof_1662137195_g.jpg"],
+            ["Processador", "AMD Ryzen 5 8500G", "999", "799", K + "520366/processador-amd-ryzen-5-8500g-3-5-ghz-5-0ghz-max-turbo-cache-6mb-6-nucleos-12-threads-am5-video-integrado-100-100000931box_1706707228_original.jpg"],
+            ["Processador", "AMD Ryzen 5 7600", "1.899", "1.549", K + "405799/processador-amd-ryzen-5-7600-5-2ghz-max-turbo-cache-38mb-am5-6-nucleos-video-integrado-100-100001015box_1673290816_original.jpg"],
+            ["Processador", "Intel Core i7-12700KF", "2.999", "2.588", "https://images9.kabum.com.br/produtos/fotos/241049/processador-intel-core-i7-12700kf-cache-25mb-3-6ghz-5-0ghz-max-turbo-lga-1700-bx8071512700kf_1634829834_g.jpg"]
+        ];
+
+        // ---------- Monta todos os cards ----------
+        const numero = (txt) => parseFloat(txt.replace(/\./g, "").replace(",", "."));
+
+        const grid = document.getElementById("produtos");
+        grid.innerHTML = produtos.map(([categoria, nome, antigo, atual, imagem], i) => {
+            const desconto = Math.round((1 - numero(atual) / numero(antigo)) * 100);
+            return `
+            <div class="product-card" style="--i:${i % 8}">
+                ${desconto > 0 ? `<span class="product-badge">-${desconto}%</span>` : ""}
+                <div class="card-shine"></div>
+                <div class="product-image"><img src="${imagem}" alt="${nome}" loading="lazy"></div>
+                <div class="product-info">
+                    <span class="product-category">${categoria}</span>
+                    <h2 class="product-title">${nome}</h2>
+                    <div class="product-price-container">
+                        <span class="price-old">R$ ${antigo}</span>
+                        <span class="price-current">R$ ${atual}</span>
+                    </div>
+                    <button class="btn-buy" data-i="${i}">Comprar Agora</button>
+                </div>
+            </div>`;
+        }).join("");
+
+        const cards = [...grid.querySelectorAll(".product-card")];
+        const podeMover = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const temMouse = matchMedia("(hover: hover)").matches;
+
+        // ---------- Imagem quebrada: mostra aviso em vez de ícone feio ----------
+        grid.querySelectorAll(".product-image img").forEach((img) => {
+            img.addEventListener("error", () => {
+                const box = img.parentElement;
+                box.classList.add("sem-imagem");
+                box.insertAdjacentHTML("beforeend", "<span>Sem imagem</span>");
+            });
+        });
+
+        // ---------- Aparece ao rolar a página ----------
+        const observador = new IntersectionObserver((entradas) => {
+            entradas.forEach((e) => {
+                if (e.isIntersecting) {
+                    e.target.classList.add("is-visible");
+                    observador.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: "0px 0px -40px 0px" });
+        cards.forEach((c) => observador.observe(c));
+
+        // ---------- Inclinação 3D + spotlight que segue o mouse ----------
+        if (temMouse && podeMover) {
+            cards.forEach((card) => {
+                card.addEventListener("mousemove", (e) => {
+                    const r = card.getBoundingClientRect();
+                    const x = (e.clientX - r.left) / r.width;
+                    const y = (e.clientY - r.top) / r.height;
+                    card.style.setProperty("--mx", `${x * 100}%`);
+                    card.style.setProperty("--my", `${y * 100}%`);
+                    card.style.setProperty("--ry", `${(x - 0.5) * 14}deg`);
+                    card.style.setProperty("--rx", `${(0.5 - y) * 12}deg`);
+                    card.style.transition = "transform .08s linear, box-shadow .45s, border-color .45s";
+                });
+                card.addEventListener("mouseleave", () => {
+                    card.style.setProperty("--rx", "0deg");
+                    card.style.setProperty("--ry", "0deg");
+                    card.style.transition = "";
+                });
+            });
+
+            // brilho que acompanha o cursor pela página
+            const glow = document.createElement("div");
+            glow.className = "cursor-glow";
+            document.body.appendChild(glow);
+            window.addEventListener("mousemove", (e) => {
+                glow.style.setProperty("--cx", `${e.clientX}px`);
+                glow.style.setProperty("--cy", `${e.clientY}px`);
+            }, { passive: true });
+        }
+
+        // ---------- Login do painel administrativo (senha conferida no servidor) ----------
+        (() => {
+            const dlg = document.getElementById("login-admin");
+            const form = document.getElementById("login-form");
+            const campo = document.getElementById("login-senha");
+            const msg = document.getElementById("login-msg");
+
+            const abrir = () => {
+                if (Auth.logado()) { location.href = "admin.html"; return; }
+                campo.value = ""; msg.textContent = ""; campo.classList.remove("erro");
+                dlg.showModal(); campo.focus();
+            };
+            document.getElementById("abrir-admin").addEventListener("click", abrir);
+            document.getElementById("login-cancelar").addEventListener("click", () => dlg.close());
+            dlg.addEventListener("click", (e) => { if (e.target === dlg) dlg.close(); });
+
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const botao = form.querySelector('button[type="submit"]');
+                botao.disabled = true; msg.textContent = "";
+                const r = await Auth.entrar(campo.value);
+                botao.disabled = false;
+                if (r.ok) { location.href = "admin.html"; return; }
+                campo.classList.remove("erro"); void campo.offsetWidth; campo.classList.add("erro");
+                campo.select();
+                msg.textContent = r.erro;
+            });
+        })();
+
+        // ---------- Barra de progresso da rolagem ----------
+        const barra = document.createElement("div");
+        barra.className = "scroll-progress";
+        document.body.appendChild(barra);
+        const atualizaBarra = () => {
+            const max = document.documentElement.scrollHeight - innerHeight;
+            barra.style.setProperty("--scroll", max > 0 ? scrollY / max : 0);
+        };
+        addEventListener("scroll", atualizaBarra, { passive: true });
+        atualizaBarra();
+
+        // ---------- Botão: onda no clique + confirmação ----------
+        grid.addEventListener("click", (e) => {
+            const btn = e.target.closest(".btn-buy");
+            if (!btn) return;
+
+            const p = produtos[btn.dataset.i];
+            Carrinho.adicionar({
+                id: "p" + btn.dataset.i,
+                nome: p[1],
+                preco: numero(p[3]),
+                imagem: p[4],
+                categoria: p[0]
+            });
+
+            btn.classList.add("added");
+            btn.textContent = "Adicionado ✓";
+            const r = btn.getBoundingClientRect();
+            const onda = document.createElement("span");
+            onda.className = "ripple";
+            onda.style.left = `${e.clientX - r.left}px`;
+            onda.style.top = `${e.clientY - r.top}px`;
+            btn.appendChild(onda);
+            setTimeout(() => onda.remove(), 800);
+
+            setTimeout(() => {
+                btn.classList.remove("added");
+                btn.textContent = "Comprar Agora";
+            }, 1800);
+        });
+    </script>
+</body>
+</html>

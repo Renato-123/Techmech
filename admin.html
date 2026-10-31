@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Techmech · Painel administrativo</title>
+<script src="auth.js"></script>
+<script>if (!window.Auth || !Auth.logado()) location.replace('index.html');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&family=Roboto+Condensed:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+    --bg-0: #05060a;
+    --bg-1: #0a0c14;
+    --panel: #0e111b;
+    --panel-2: #131726;
+    --stroke: rgba(255,255,255,.09);
+    --stroke-strong: rgba(255,255,255,.18);
+    --text: #f2f4fa;
+    --text-soft: #a8afc4;
+    --text-faint: #7a829e;
+    --accent: #7c5cff;
+    --accent-2: #00d4ff;
+    --accent-3: #ff3d81;
+    --green: #2dffa3;
+    --danger: #ff4d6d;
+    --warn: #ffc24d;
+    --font-display: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+    --font-body: 'Raleway', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { color-scheme: dark; }
+body {
+    min-height: 100vh;
+    font: 15px/1.5 var(--font-body);
+    color: var(--text);
+    background:
+        radial-gradient(1000px 520px at 8% -10%, rgba(124,92,255,.14), transparent 60%),
+        radial-gradient(900px 500px at 100% 0%, rgba(0,212,255,.08), transparent 60%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-0));
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+}
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; }
+:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+.num { font-family: var(--font-display); font-variant-numeric: tabular-nums; letter-spacing: .01em; }
+
+/* ---------- topo ---------- */
+.topo {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(8,10,17,.82);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--stroke);
+}
+.topo-in {
+    max-width: 1240px; margin: 0 auto; padding: 14px 24px;
+    display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+.marca { display: flex; align-items: baseline; gap: 12px; margin-right: auto; }
+.marca b {
+    font: 800 1.6rem/1 var(--font-display);
+    background: linear-gradient(120deg, var(--accent), var(--accent-2) 55%, var(--green));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.marca span { color: var(--text-soft); font-weight: 600; }
+.segmento { display: inline-flex; padding: 3px; gap: 2px; background: var(--panel); border: 1px solid var(--stroke); border-radius: 999px; }
+.segmento button { padding: 6px 14px; border-radius: 999px; color: var(--text-soft); font-weight: 600; font-size: .9rem; transition: background .25s var(--ease), color .25s; }
+.segmento button:hover { color: var(--text); }
+.segmento button[aria-pressed="true"] { background: var(--accent); color: #fff; }
+.btn {
+    padding: 8px 16px; border-radius: 10px; font-weight: 600; font-size: .9rem;
+    background: var(--panel-2); border: 1px solid var(--stroke); color: var(--text);
+    transition: border-color .25s, background .25s;
+    text-decoration: none; display: inline-block;
+}
+.btn:hover { border-color: var(--stroke-strong); background: #1a1f33; }
+.btn.perigo { color: var(--danger); }
+
+main { max-width: 1240px; margin: 0 auto; padding: 24px 24px 80px; display: grid; gap: 20px; }
+
+/* ---------- avisos ---------- */
+#avisos { display: grid; gap: 10px; }
+#avisos:empty { display: none; }
+.aviso {
+    display: flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    padding: 12px 16px; border-radius: 12px; border: 1px solid var(--stroke);
+    background: var(--panel); color: var(--text-soft);
+}
+.aviso p { flex: 1 1 280px; }
+.aviso b { color: var(--text); }
+.aviso.alerta { border-color: rgba(255,194,77,.5); background: rgba(255,194,77,.07); }
+.aviso.alerta b { color: var(--warn); }
+.aviso.demo { border-color: rgba(124,92,255,.5); background: rgba(124,92,255,.08); }
+
+/* ---------- painéis ---------- */
+.painel { background: var(--panel); border: 1px solid var(--stroke); border-radius: 16px; padding: 20px; min-width: 0; }
+.painel h2 { font: 700 1.05rem/1.2 var(--font-display); letter-spacing: .02em; }
+.painel-topo { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.sub { color: var(--text-faint); font-size: .85rem; }
+
+/* ---------- indicadores ---------- */
+.kpis {
+    display: grid; grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr));
+    gap: 1px; background: var(--stroke);
+    border: 1px solid var(--stroke); border-radius: 16px; overflow: hidden;
+}
+.kpi { background: var(--panel); padding: 20px 22px; }
+.kpi dt { color: var(--text-soft); font-size: .88rem; font-weight: 600; }
+.kpi dd { margin-top: 6px; font: 800 2rem/1.1 var(--font-display); font-variant-numeric: tabular-nums; }
+.kpi.destaque dd { font-size: clamp(2rem, 3.4vw, 2.6rem); background: linear-gradient(120deg, var(--green), #b6ff6a); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.kpi small { display: block; margin-top: 4px; color: var(--text-faint); font-size: .8rem; }
+
+/* ---------- gráfico ---------- */
+.linha-2 { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; }
+.grafico { position: relative; height: 230px; display: flex; align-items: flex-end; gap: 3px; padding-top: 22px; border-bottom: 1px solid var(--stroke-strong); }
+.grafico::before { content: attr(data-max); position: absolute; top: 0; left: 0; font-size: .75rem; color: var(--text-faint); }
+.grafico::after { content: ""; position: absolute; left: 0; right: 0; top: 22px; border-top: 1px dashed var(--stroke); pointer-events: none; }
+.barra { position: relative; flex: 1 1 0; height: 100%; display: flex; align-items: flex-end; border-radius: 4px 4px 0 0; }
+.barra i { display: block; width: 100%; min-height: 2px; border-radius: 4px 4px 0 0; background: linear-gradient(180deg, var(--accent-2), var(--accent)); opacity: .75; transition: opacity .2s, transform .45s var(--ease); transform-origin: bottom; }
+.barra.vazia i { background: var(--stroke-strong); opacity: 1; }
+.barra:hover i, .barra:focus-visible i, .barra.ativa i { opacity: 1; }
+.eixo { display: flex; justify-content: space-between; margin-top: 8px; color: var(--text-faint); font-size: .78rem; }
+.leitura { margin-top: 14px; min-height: 1.5em; color: var(--text-soft); }
+.leitura b { color: var(--text); }
+
+/* ---------- listas com barra ---------- */
+.ranking { list-style: none; display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+.ranking li { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; min-width: 0; }
+.ranking .linha { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.ranking .nome { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.ranking .valor { white-space: nowrap; color: var(--text-soft); font-size: .9rem; }
+.trilho { height: 6px; border-radius: 6px; background: rgba(255,255,255,.07); overflow: hidden; }
+.trilho i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+.vazio { color: var(--text-faint); font-size: .92rem; }
+.grade-auto { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+
+/* ---------- pedidos ---------- */
+.ferramentas { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-right: auto; }
+.chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--stroke); color: var(--text-soft); font-size: .88rem; font-weight: 600; transition: border-color .2s, color .2s, background .2s; }
+.chip:hover { border-color: var(--stroke-strong); color: var(--text); }
+.chip[aria-pressed="true"] { background: rgba(124,92,255,.18); border-color: var(--accent); color: #fff; }
+.chip em { font-style: normal; margin-left: 6px; color: var(--text-faint); }
+.busca { width: min(280px, 100%); padding: 8px 14px; border-radius: 10px; background: var(--bg-1); border: 1px solid var(--stroke); }
+.busca::placeholder { color: var(--text-faint); }
+.busca:focus { outline: none; border-color: var(--accent); }
+.tabela-wrap { overflow-x: auto; border: 1px solid var(--stroke); border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; min-width: 760px; }
+th, td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--stroke); vertical-align: middle; }
+th { font-size: .82rem; color: var(--text-faint); font-weight: 600; background: rgba(255,255,255,.02); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: rgba(255,255,255,.025); }
+td.dir, th.dir { text-align: right; }
+.ped-num { color: var(--accent-2); font-weight: 700; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 3px; transition: text-decoration-color .2s; }
+.ped-num:hover { text-decoration-color: currentColor; }
+.cancelado td:not(:last-child) { color: var(--text-faint); }
+.cancelado .total { text-decoration: line-through; }
+.status { padding: 5px 28px 5px 12px; border-radius: 999px; border: 1px solid var(--stroke); background: var(--bg-1); font-size: .85rem; font-weight: 600; appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%), linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+.status[data-s="pago"] { color: var(--accent-2); border-color: rgba(0,212,255,.4); }
+.status[data-s="enviado"] { color: #b3a0ff; border-color: rgba(124,92,255,.5); }
+.status[data-s="entregue"] { color: var(--green); border-color: rgba(45,255,163,.4); }
+.status[data-s="cancelado"] { color: var(--danger); border-color: rgba(255,77,109,.4); }
+.status option { background: var(--panel); color: var(--text); }
+.mais { display: block; margin: 16px auto 0; }
+
+/* ---------- vazio geral ---------- */
+.estado-vazio { text-align: center; padding: 38px 16px; }
+.estado-vazio h3 { font: 700 1.2rem var(--font-display); margin-bottom: 6px; }
+.estado-vazio p { color: var(--text-soft); max-width: 46ch; margin: 0 auto 16px; }
+
+/* ---------- detalhe do pedido ---------- */
+dialog { margin: auto; width: min(560px, calc(100% - 28px)); max-height: calc(100vh - 40px); overflow: auto; padding: 26px; border: 1px solid var(--stroke-strong); border-radius: 18px; background: var(--panel); color: var(--text); box-shadow: 0 30px 80px -10px rgba(0,0,0,.8); }
+dialog::backdrop { background: rgba(3,4,10,.7); backdrop-filter: blur(3px); }
+.det-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 18px; }
+.det-topo h2 { font: 800 1.5rem/1.1 var(--font-display); }
+.det-topo p { color: var(--text-faint); font-size: .88rem; }
+.fechar { font-size: 1.6rem; line-height: 1; color: var(--text-soft); padding: 2px 8px; border-radius: 8px; }
+.fechar:hover { color: var(--text); background: var(--panel-2); }
+.det-itens { list-style: none; display: grid; gap: 8px; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--stroke); }
+.det-itens li { display: flex; justify-content: space-between; gap: 14px; }
+.det-itens small { color: var(--text-faint); display: block; }
+.det-res { display: grid; gap: 8px; margin-bottom: 18px; }
+.det-res div { display: flex; justify-content: space-between; gap: 14px; color: var(--text-soft); }
+.det-res dd { color: var(--text); text-align: right; }
+.det-res .desc dd { color: var(--green); }
+.det-res .tot { padding-top: 10px; border-top: 1px solid var(--stroke); color: var(--text); font-weight: 700; }
+.det-res .tot dd { font: 800 1.5rem/1 var(--font-display); }
+.det-acoes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.det-acoes label { display: flex; align-items: center; gap: 8px; margin-right: auto; color: var(--text-soft); }
+
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); padding: 10px 18px; border-radius: 10px; background: var(--panel-2); border: 1px solid var(--stroke-strong); opacity: 0; pointer-events: none; transition: opacity .25s, transform .3s var(--ease); z-index: 60; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+@media (max-width: 900px) { .linha-2 { grid-template-columns: 1fr; } .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .kpi.destaque, .kpi:last-child { grid-column: 1 / -1; } }
+@media (max-width: 560px) {
+    .topo-in, main { padding-left: 14px; padding-right: 14px; }
+    .kpi dd { font-size: 1.6rem; } .kpi.destaque dd { font-size: 2rem; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<header class="topo">
+    <div class="topo-in">
+        <div class="marca"><b>Techmech</b><span>Painel administrativo</span></div>
+        <div class="segmento" role="group" aria-label="Período" id="periodo">
+            <button type="button" data-p="7" aria-pressed="false">7 dias</button>
+            <button type="button" data-p="30" aria-pressed="true">30 dias</button>
+            <button type="button" data-p="all" aria-pressed="false">Tudo</button>
+        </div>
+        <a class="btn" href="index.html">Ver loja</a>
+        <button class="btn" type="button" id="sair">Sair</button>
+    </div>
+</header>
+
+<main>
+    <div id="avisos"></div>
+
+    <dl class="kpis" id="kpis"></dl>
+
+    <div class="linha-2">
+        <section class="painel" aria-labelledby="t-graf">
+            <div class="painel-topo">
+                <h2 id="t-graf">Receita por dia</h2>
+                <span class="sub" id="graf-sub"></span>
+            </div>
+            <div class="grafico" id="grafico" role="group" aria-label="Receita diária"></div>
+            <div class="eixo" id="eixo" aria-hidden="true"></div>
+            <p class="leitura" id="leitura" aria-live="polite"></p>
+        </section>
+
+        <section class="painel" aria-labelledby="t-top">
+            <div class="painel-topo"><h2 id="t-top">Produtos mais vendidos</h2></div>
+            <ol class="ranking" id="top-produtos"></ol>
+        </section>
+    </div>
+
+    <div class="grade-auto">
+        <section class="painel" aria-labelledby="t-pag"><div class="painel-topo"><h2 id="t-pag">Formas de pagamento</h2></div><ul class="ranking" id="r-pag"></ul></section>
+        <section class="painel" aria-labelledby="t-ent"><div class="painel-topo"><h2 id="t-ent">Tipos de entrega</h2></div><ul class="ranking" id="r-ent"></ul></section>
+        <section class="painel" aria-labelledby="t-cat"><div class="painel-topo"><h2 id="t-cat">Categorias</h2></div><ul class="ranking" id="r-cat"></ul></section>
+        <section class="painel" aria-labelledby="t-cup"><div class="painel-topo"><h2 id="t-cup">Cupons usados</h2></div><ul class="ranking" id="r-cup"></ul></section>
+    </div>
+
+    <section class="painel" aria-labelledby="t-ped">
+        <div class="painel-topo">
+            <h2 id="t-ped">Pedidos</h2>
+            <span class="sub" id="ped-sub"></span>
+        </div>
+        <div class="ferramentas">
+            <div class="chips" id="chips" role="group" aria-label="Filtrar por status"></div>
+            <input class="busca" id="busca" type="search" placeholder="Buscar por número ou produto" aria-label="Buscar pedidos">
+            <button class="btn" type="button" id="exportar">Exportar CSV</button>
+        </div>
+        <div class="tabela-wrap">
+            <table>
+                <thead><tr>
+                    <th>Pedido</th><th>Data</th><th>Itens</th><th>Pagamento</th><th class="dir">Total</th><th>Status</th>
+                </tr></thead>
+                <tbody id="linhas"></tbody>
+            </table>
+        </div>
+        <button class="btn mais" type="button" id="mais" hidden>Mostrar mais pedidos</button>
+    </section>
+
+    <section class="painel" aria-labelledby="t-dados">
+        <div class="painel-topo"><h2 id="t-dados">Dados</h2></div>
+        <div class="ferramentas" style="margin:0">
+            <button class="btn" type="button" id="gerar">Gerar dados de exemplo</button>
+            <button class="btn perigo" type="button" id="apagar">Apagar todos os pedidos</button>
+            <span class="sub">Os pedidos ficam salvos no banco de dados do servidor (arquivo techmech.db) e atualizam sozinhos a cada 20 segundos.</span>
+        </div>
+    </section>
+</main>
+
+<dialog id="detalhe" aria-labelledby="det-titulo"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+const POR_PAGINA = 20;
+const FRETE_GRATIS_ACIMA = 5000;
+
+const STATUS = { pago: 'Pago', enviado: 'Enviado', entregue: 'Entregue', cancelado: 'Cancelado' };
+const FRETES = { retirada: 'Retirar na loja', economico: 'Econômico', expresso: 'Expresso' };
+const PAGAMENTOS = { pix: 'Pix', cartao: 'Cartão de crédito', boleto: 'Boleto' };
+
+const brl = (n) => n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const brlCurto = (n) => n >= 10000 ? 'R$ ' + (n / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil' : brl(n);
+const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const $ = (s) => document.querySelector(s);
+const arred = (n) => Math.round(n * 100) / 100;
+
+/* ---------- banco de dados (via servidor.py) ---------- */
+let dados = [];
+let conectado = true;
+const ler = () => dados;
+
+const api = async (caminho, opc = {}) => {
+    let r;
+    try { r = await Auth.fetch('/api/' + caminho, opc); }
+    catch (_) { throw new Error('Sem conexão com o servidor'); }
+    if (r.status === 401) { Auth.sair(); location.replace('index.html'); throw new Error('401'); }
+    const corpo = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(corpo.erro || 'Erro no servidor');
+    return corpo;
+};
+
+const carregar = async () => {
+    try { dados = await api('pedidos'); conectado = true; }
+    catch (e) { if (e.message === '401') return; conectado = false; }
+    render();
+};
+
+let timerToast;
+const aviso = (msg) => {
+    const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+    clearTimeout(timerToast); timerToast = setTimeout(() => t.classList.remove('on'), 2600);
+};
+
+/* ---------- estado da tela ---------- */
+const ui = { periodo: '30', status: 'todos', busca: '', limite: POR_PAGINA };
+
+/* ---------- dados derivados ---------- */
+const inicioHoje = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const noPeriodo = (p) => {
+    if (ui.periodo === 'all') return true;
+    const corte = inicioHoje(); corte.setDate(corte.getDate() - (Number(ui.periodo) - 1));
+    return new Date(p.data) >= corte;
+};
+const validos = (l) => l.filter((p) => p.status !== 'cancelado');
+const qtdItens = (p) => p.itens.reduce((s, i) => s + i.qtd, 0);
+const soma = (l, f) => l.reduce((s, x) => s + f(x), 0);
+const pagRotulo = (p) => p.pagamento === 'cartao' ? `Cartão ${p.parcelas}x` : (PAGAMENTOS[p.pagamento] || p.pagamento);
+
+const agrupar = (lista, chaveFn, valorFn) => {
+    const m = new Map();
+    lista.forEach((x) => { const k = chaveFn(x); m.set(k, (m.get(k) || 0) + valorFn(x)); });
+    return [...m.entries()].sort((a, b) => b[1] - a[1]);
+};
+
+/* ---------- blocos de interface ---------- */
+const ranking = (el, linhas, vazio) => {
+    if (!linhas.length) { el.innerHTML = `<li class="vazio">${vazio}</li>`; return; }
+    const max = Math.max(...linhas.map((l) => l.valor)) || 1;
+    el.innerHTML = linhas.map((l) => `
+        <li>
+            <div class="linha"><span class="nome" title="${esc(l.nome)}">${esc(l.nome)}</span><span class="valor num">${esc(l.texto)}</span></div>
+            <div class="trilho"><i style="width:${Math.max(3, l.valor / max * 100)}%"></i></div>
+        </li>`).join('');
+};
+
+const renderKpis = (todos) => {
+    const v = validos(todos);
+    const receita = soma(v, (p) => p.total);
+    const itens = soma(v, qtdItens);
+    const descontos = soma(v, (p) => (p.descCupom || 0) + (p.descPagamento || 0));
+    const cancel = todos.length - v.length;
+    $('#kpis').innerHTML = `
+        <div class="kpi destaque"><dt>Receita</dt><dd>${brl(receita)}</dd><small>${cancel ? `${cancel} cancelado${cancel > 1 ? 's' : ''} fora da conta` : 'Pedidos não cancelados'}</small></div>
+        <div class="kpi"><dt>Pedidos</dt><dd>${v.length}</dd><small>${itens} ${itens === 1 ? 'item vendido' : 'itens vendidos'}</small></div>
+        <div class="kpi"><dt>Ticket médio</dt><dd>${v.length ? brl(receita / v.length) : '—'}</dd><small>Valor médio por pedido</small></div>
+        <div class="kpi"><dt>Descontos dados</dt><dd>${brl(descontos)}</dd><small>Cupons e desconto à vista</small></div>`;
+};
+
+let melhorDia = '';
+const renderGrafico = (todos) => {
+    const dias = ui.periodo === 'all' ? 30 : Number(ui.periodo);
+    const hoje = inicioHoje();
+    const chave = (d) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const baldes = [];
+    for (let i = dias - 1; i >= 0; i--) {
+        const d = new Date(hoje); d.setDate(d.getDate() - i);
+        baldes.push({ d, k: chave(d), v: 0, n: 0 });
+    }
+    const idx = new Map(baldes.map((b) => [b.k, b]));
+    validos(todos).forEach((p) => { const b = idx.get(chave(new Date(p.data))); if (b) { b.v += p.total; b.n++; } });
+
+    const max = Math.max(...baldes.map((b) => b.v));
+    const fmtData = (d) => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    const g = $('#grafico');
+    g.dataset.max = max ? brlCurto(max) : '';
+    g.innerHTML = baldes.map((b, i) => `
+        <button type="button" class="barra ${b.v ? '' : 'vazia'}" data-i="${i}" aria-label="${fmtData(b.d)}: ${brl(b.v)}, ${b.n} pedido${b.n === 1 ? '' : 's'}">
+            <i style="height:${max ? b.v / max * 100 : 0}%"></i>
+        </button>`).join('');
+    g._baldes = baldes; g._fmt = fmtData;
+
+    $('#graf-sub').textContent = ui.periodo === 'all' ? 'Últimos 30 dias' : `Últimos ${dias} dias`;
+    $('#eixo').innerHTML = `<span>${fmtData(baldes[0].d)}</span><span>${fmtData(baldes[Math.floor(baldes.length / 2)].d)}</span><span>Hoje</span>`;
+
+    const melhor = baldes.reduce((a, b) => b.v > a.v ? b : a, baldes[0]);
+    melhorDia = max ? `Melhor dia: <b>${fmtData(melhor.d)}</b> · <b class="num">${brl(melhor.v)}</b> em ${melhor.n} pedido${melhor.n === 1 ? '' : 's'}` : 'Nenhuma venda neste período.';
+    $('#leitura').innerHTML = melhorDia;
+};
+
+const renderRankings = (todos) => {
+    const v = validos(todos).filter(noPeriodo);
+    const totalReceita = soma(v, (p) => p.total) || 1;
+
+    const itens = v.flatMap((p) => p.itens);
+    const prods = new Map();
+    itens.forEach((i) => {
+        const a = prods.get(i.nome) || { qtd: 0, rec: 0 };
+        a.qtd += i.qtd; a.rec += i.preco * i.qtd; prods.set(i.nome, a);
+    });
+    const top = [...prods.entries()].sort((a, b) => b[1].qtd - a[1].qtd || b[1].rec - a[1].rec).slice(0, 6);
+    ranking($('#top-produtos'), top.map(([nome, a]) => ({ nome, valor: a.qtd, texto: `${a.qtd}× · ${brlCurto(a.rec)}` })), 'Sem vendas neste período.');
+    ranking($('#r-pag'),
+        agrupar(v, (p) => PAGAMENTOS[p.pagamento] || p.pagamento, (p) => p.total)
+            .map(([nome, val]) => ({ nome, valor: val, texto: `${Math.round(val / totalReceita * 100)}% · ${brlCurto(val)}` })),
+        'Sem vendas neste período.');
+    ranking($('#r-ent'),
+        agrupar(v, (p) => FRETES[p.freteTipo] || p.freteTipo, () => 1)
+            .map(([nome, n]) => ({ nome, valor: n, texto: `${n} pedido${n === 1 ? '' : 's'}` })),
+        'Sem vendas neste período.');
+    ranking($('#r-cat'),
+        agrupar(itens.filter((i) => i.categoria), (i) => i.categoria, (i) => i.preco * i.qtd)
+            .map(([nome, val]) => ({ nome, valor: val, texto: brlCurto(val) })),
+        'Sem vendas com categoria neste período.');
+
+    const comCupom = v.filter((p) => p.cupom);
+    const cup = new Map();
+    comCupom.forEach((p) => { const a = cup.get(p.cupom) || { n: 0, d: 0 }; a.n++; a.d += p.descCupom || 0; cup.set(p.cupom, a); });
+    ranking($('#r-cup'),
+        [...cup.entries()].sort((a, b) => b[1].n - a[1].n)
+            .map(([nome, a]) => ({ nome, valor: a.n, texto: `${a.n}× · −${brlCurto(a.d)}` })),
+        'Nenhum cupom usado neste período.');
+};
+
+const renderAvisos = (todos) => {
+    const box = $('#avisos');
+    const partes = [];
+    const demo = todos.filter((p) => p.demo).length;
+
+    if (!conectado) {
+        box.innerHTML = `<div class="aviso alerta"><p><b>Sem conexão com o servidor.</b> Rode <b>python servidor.py</b> e abra o painel por http://localhost:8000/admin.html.</p><button class="btn" type="button" data-acao="recarregar">Tentar de novo</button></div>`;
+        return;
+    }
+
+    if (!todos.length) {
+        partes.push(`<div class="painel estado-vazio">
+            <h3>Nenhum pedido ainda</h3>
+            <p>Quando um cliente finalizar uma compra na loja, o pedido aparece aqui. Para ver como o painel fica, carregue pedidos de exemplo.</p>
+            <button class="btn" type="button" data-acao="gerar">Gerar dados de exemplo</button>
+        </div>`);
+    } else {
+        const gratis = validos(todos).filter((p) => p.cupom && (p.descCupom || 0) >= (p.subtotal || 0) - 0.005);
+        if (gratis.length) partes.push(`<div class="aviso alerta"><p><b>${gratis.length} pedido${gratis.length > 1 ? 's' : ''} com 100% de desconto.</b> Um cupom (${[...new Set(gratis.map((p) => esc(p.cupom)))].join(', ')}) zera o valor dos produtos. Confira se é isso mesmo que você quer.</p></div>`);
+        const aguardando = todos.filter((p) => p.status === 'pago').length;
+        if (aguardando) partes.push(`<div class="aviso"><p><b>${aguardando} pedido${aguardando > 1 ? 's' : ''} pago${aguardando > 1 ? 's' : ''}</b> ainda não ${aguardando > 1 ? 'foram enviados' : 'foi enviado'}.</p><button class="btn" type="button" data-acao="ver-pagos">Ver pedidos</button></div>`);
+        if (demo) partes.push(`<div class="aviso demo"><p><b>${demo} pedidos de exemplo</b> estão misturados aos seus dados.</p><button class="btn" type="button" data-acao="remover-demo">Remover exemplos</button></div>`);
+    }
+    box.innerHTML = partes.join('');
+};
+
+const dataBR = (iso) => new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+
+const filtrados = (todos) => {
+    const q = ui.busca.trim().toLowerCase();
+    return todos.filter(noPeriodo)
+        .filter((p) => ui.status === 'todos' || p.status === ui.status)
+        .filter((p) => !q || p.numero.toLowerCase().includes(q) || p.itens.some((i) => i.nome.toLowerCase().includes(q)))
+        .sort((a, b) => new Date(b.data) - new Date(a.data));
+};
+
+const renderPedidos = (todos) => {
+    const doPeriodo = todos.filter(noPeriodo);
+    const cont = (s) => s === 'todos' ? doPeriodo.length : doPeriodo.filter((p) => p.status === s).length;
+    $('#chips').innerHTML = ['todos', ...Object.keys(STATUS)].map((s) =>
+        `<button type="button" class="chip" data-s="${s}" aria-pressed="${ui.status === s}">${s === 'todos' ? 'Todos' : STATUS[s]}<em class="num">${cont(s)}</em></button>`).join('');
+
+    const lista = filtrados(todos);
+    const parte = lista.slice(0, ui.limite);
+    $('#ped-sub').textContent = `${lista.length} pedido${lista.length === 1 ? '' : 's'}`;
+    $('#mais').hidden = lista.length <= ui.limite;
+
+    if (!parte.length) {
+        $('#linhas').innerHTML = `<tr><td colspan="6" class="vazio" style="padding:28px;text-align:center">${todos.length ? 'Nenhum pedido com esses filtros.' : 'Sem pedidos para mostrar.'}</td></tr>`;
+        return;
+    }
+    $('#linhas').innerHTML = parte.map((p) => {
+        const n = qtdItens(p);
+        const resumo = p.itens[0].nome + (p.itens.length > 1 ? ` +${p.itens.length - 1}` : '');
+        return `
+        <tr class="${p.status === 'cancelado' ? 'cancelado' : ''}">
+            <td><button type="button" class="ped-num num" data-ver="${esc(p.numero)}">${esc(p.numero)}</button></td>
+            <td class="num" style="white-space:nowrap">${dataBR(p.data)}</td>
+            <td><span title="${n} ${n === 1 ? 'item' : 'itens'}">${esc(resumo)}</span></td>
+            <td>${esc(pagRotulo(p))}</td>
+            <td class="dir num total">${brl(p.total)}</td>
+            <td><select class="status" data-s="${p.status}" data-num="${esc(p.numero)}" aria-label="Status do pedido ${esc(p.numero)}">
+                ${Object.entries(STATUS).map(([k, t]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${t}</option>`).join('')}
+            </select></td>
+        </tr>`;
+    }).join('');
+};
+
+const render = () => {
+    const todos = ler();
+    document.querySelectorAll('#periodo button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.p === ui.periodo));
+    renderAvisos(todos);
+    renderKpis(todos.filter(noPeriodo));
+    renderGrafico(todos);
+    renderRankings(todos);
+    renderPedidos(todos);
+};
+
+/* ---------- detalhe do pedido ---------- */
+const abrirDetalhe = (numero) => {
+    const p = ler().find((x) => x.numero === numero);
+    if (!p) return;
+    const d = $('#detalhe');
+    d.innerHTML = `
+        <div class="det-topo">
+            <div><h2 id="det-titulo" class="num">Pedido ${esc(p.numero)}</h2><p>${dataBR(p.data)}${p.demo ? ' · exemplo' : ''}</p></div>
+            <button type="button" class="fechar" data-fechar aria-label="Fechar">&times;</button>
+        </div>
+        <ul class="det-itens">
+            ${p.itens.map((i) => `<li><span>${i.qtd}× ${esc(i.nome)}<small>${esc(i.categoria || '')} · ${brl(i.preco)} cada</small></span><b class="num">${brl(i.preco * i.qtd)}</b></li>`).join('')}
+        </ul>
+        <dl class="det-res">
+            <div><dt>Produtos</dt><dd class="num">${brl(p.subtotal)}</dd></div>
+            ${p.descCupom ? `<div class="desc"><dt>Cupom ${esc(p.cupom)}</dt><dd class="num">− ${brl(p.descCupom)}</dd></div>` : ''}
+            ${p.descPagamento ? `<div class="desc"><dt>Desconto ${esc(PAGAMENTOS[p.pagamento] || '')}</dt><dd class="num">− ${brl(p.descPagamento)}</dd></div>` : ''}
+            <div><dt>Entrega · ${esc(FRETES[p.freteTipo] || p.freteTipo)}</dt><dd class="num">${p.frete ? brl(p.frete) : 'Grátis'}</dd></div>
+            <div><dt>Pagamento</dt><dd>${esc(PAGAMENTOS[p.pagamento] || p.pagamento)}${p.pagamento === 'cartao' ? ` · ${p.parcelas}x${p.juros ? ' com juros' : ' sem juros'}` : ''}</dd></div>
+            <div class="tot"><dt>Total</dt><dd class="num">${brl(p.total)}</dd></div>
+        </dl>
+        <div class="det-acoes">
+            <label>Status
+                <select class="status" data-s="${p.status}" data-num="${esc(p.numero)}" data-no-detalhe>
+                    ${Object.entries(STATUS).map(([k, t]) => `<option value="${k}" ${k === p.status ? 'selected' : ''}>${t}</option>`).join('')}
+                </select>
+            </label>
+            <button type="button" class="btn perigo" data-excluir="${esc(p.numero)}">Excluir pedido</button>
+            <button type="button" class="btn" data-fechar>Fechar</button>
+        </div>`;
+    d.showModal();
+};
+
+/* ---------- dados de exemplo ---------- */
+const CATALOGO = [
+    ['Placa de vídeo', 'RTX 5090', 33000], ['Placa de vídeo', 'MSI RTX 5070 Ti Ventus 3X OC', 8683],
+    ['Placa de vídeo', 'RTX 4070 Ti Super Windforce 16GB', 7299], ['Placa de vídeo', 'RTX 5060 Ti Windforce 8GB', 2999],
+    ['Placa de vídeo', 'RTX 4060 ASUS Dual EVO 8GB', 2399], ['Placa de vídeo', 'RTX 3060 Gaming OC 8GB', 2299],
+    ['Placa de vídeo', 'RTX 5070 Windforce SFF 12GB Gigabyte', 4699], ['Placa de vídeo', 'GTX 1050 Ti PCYes Low Profile 4GB', 799],
+    ['Processador', 'AMD Ryzen 7 7800X3D', 1849], ['Processador', 'AMD Ryzen 5 7600X', 1089],
+    ['Processador', 'AMD Ryzen 5 8500G', 799], ['Processador', 'AMD Ryzen 9 7900X', 2399],
+    ['Processador', 'Intel Core i7-12700KF', 2588], ['Processador', 'AMD Ryzen 7 5800X3D', 2049]
+].map(([categoria, nome, preco], i) => ({ id: 'x' + i, categoria, nome, preco, peso: preco < 3000 ? 4 : preco < 9000 ? 2 : 0.4 }));
+
+const sorteia = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const sorteiaPeso = (arr) => {
+    let r = Math.random() * arr.reduce((s, x) => s + x.peso, 0);
+    return arr.find((x) => (r -= x.peso) < 0) || arr[0];
+};
+
+const gerarExemplos = async () => {
+    const cupons = { TECHMECH10: 0.10, BEMVINDO5: 0.05, GAMER15: 0.15 };
+    const lista = ler();
+    const existentes = new Set(lista.map((p) => p.numero));
+    const novos = [];
+    for (let n = 0; n < 48; n++) {
+        const idade = Math.pow(Math.random(), 0.8) * 30;           // em dias, mais pedidos recentes
+        const data = new Date(Date.now() - idade * 864e5);
+        const itens = [];
+        const qtdProd = Math.random() < .7 ? 1 : Math.random() < .8 ? 2 : 3;
+        while (itens.length < qtdProd) {
+            const p = sorteiaPeso(CATALOGO);
+            if (!itens.some((i) => i.id === p.id)) itens.push({ id: p.id, nome: p.nome, preco: p.preco, categoria: p.categoria, qtd: Math.random() < .85 ? 1 : 2 });
+        }
+        const subtotal = arred(itens.reduce((s, i) => s + i.preco * i.qtd, 0));
+        const cupom = Math.random() < .3 ? sorteia(Object.keys(cupons)) : null;
+        const descCupom = cupom ? arred(subtotal * cupons[cupom]) : 0;
+        const r = Math.random();
+        const pagamento = r < .45 ? 'pix' : r < .88 ? 'cartao' : 'boleto';
+        const base = subtotal - descCupom;
+        const descPagamento = arred(base * (pagamento === 'pix' ? .10 : pagamento === 'boleto' ? .05 : 0));
+        const freteTipo = sorteia(['retirada', 'economico', 'economico', 'expresso']);
+        const tabela = { retirada: 0, economico: 29.9, expresso: 59.9 }[freteTipo];
+        const frete = tabela > 0 && subtotal >= FRETE_GRATIS_ACIMA ? 0 : tabela;
+        let total = arred(base - descPagamento + frete), parcelas = 1, juros = false;
+        if (pagamento === 'cartao') {
+            parcelas = sorteia([1, 1, 3, 6, 10, 12]);
+            if (parcelas > 6) { const i = .0199; total = arred(total * i / (1 - Math.pow(1 + i, -parcelas)) * parcelas); juros = true; }
+        }
+        let status;
+        const q = Math.random();
+        if (idade > 10) status = q < .08 ? 'cancelado' : 'entregue';
+        else if (idade > 3) status = q < .06 ? 'cancelado' : q < .5 ? 'entregue' : 'enviado';
+        else status = q < .05 ? 'cancelado' : q < .35 ? 'enviado' : 'pago';
+        let numero; do { numero = 'TM' + String(Math.floor(Math.random() * 1e8)).padStart(8, '0'); } while (existentes.has(numero));
+        existentes.add(numero);
+        novos.push({ numero, data: data.toISOString(), status, itens, subtotal, cupom, descCupom, descPagamento, frete, freteTipo, pagamento, parcelas, juros, total, demo: true });
+    }
+    try {
+        await api('pedidos/importar', { method: 'POST', body: JSON.stringify(novos) });
+        aviso('48 pedidos de exemplo criados');
+    } catch (e) { aviso(e.message); }
+    await carregar();
+};
+
+/* ---------- exportar ---------- */
+const exportar = () => {
+    const lista = filtrados(ler());
+    if (!lista.length) return aviso('Não há pedidos para exportar');
+    const num = (n) => String(n ?? 0).replace('.', ',');
+    const cel = (t) => `"${String(t ?? '').replace(/"/g, '""')}"`;
+    const linhas = [['Pedido', 'Data', 'Status', 'Itens', 'Subtotal', 'Cupom', 'Desconto cupom', 'Desconto pagamento', 'Frete', 'Pagamento', 'Parcelas', 'Total']];
+    lista.forEach((p) => linhas.push([
+        p.numero, dataBR(p.data), STATUS[p.status], p.itens.map((i) => `${i.qtd}x ${i.nome}`).join(' | '),
+        num(p.subtotal), p.cupom || '', num(p.descCupom), num(p.descPagamento), num(p.frete), PAGAMENTOS[p.pagamento] || p.pagamento, p.parcelas, num(p.total)
+    ].map((v, i) => [4, 6, 7, 8, 11].includes(i) ? v : cel(v)).join(';')));
+    const blob = new Blob(['\ufeff' + linhas.map((l) => Array.isArray(l) ? l.map(cel).join(';') : l).join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `pedidos-techmech-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    aviso(`${lista.length} pedido${lista.length > 1 ? 's' : ''} exportado${lista.length > 1 ? 's' : ''}`);
+};
+
+/* ---------- eventos ---------- */
+$('#periodo').addEventListener('click', (e) => {
+    const b = e.target.closest('button[data-p]'); if (!b) return;
+    ui.periodo = b.dataset.p; ui.limite = POR_PAGINA; render();
+});
+
+const graf = $('#grafico');
+const mostrarBarra = (e) => {
+    const b = e.target.closest('.barra'); if (!b) return;
+    const x = graf._baldes[Number(b.dataset.i)];
+    graf.querySelectorAll('.ativa').forEach((el) => el.classList.remove('ativa'));
+    b.classList.add('ativa');
+    $('#leitura').innerHTML = `<b>${graf._fmt(x.d)}</b> · <b class="num">${brl(x.v)}</b> em ${x.n} pedido${x.n === 1 ? '' : 's'}`;
+};
+graf.addEventListener('mouseover', mostrarBarra);
+graf.addEventListener('focusin', mostrarBarra);
+const sairBarra = () => { graf.querySelectorAll('.ativa').forEach((el) => el.classList.remove('ativa')); $('#leitura').innerHTML = melhorDia; };
+graf.addEventListener('mouseleave', sairBarra);
+graf.addEventListener('focusout', sairBarra);
+
+$('#chips').addEventListener('click', (e) => {
+    const b = e.target.closest('.chip'); if (!b) return;
+    ui.status = b.dataset.s; ui.limite = POR_PAGINA; renderPedidos(ler());
+});
+$('#busca').addEventListener('input', (e) => { ui.busca = e.target.value; ui.limite = POR_PAGINA; renderPedidos(ler()); });
+$('#mais').addEventListener('click', () => { ui.limite += POR_PAGINA; renderPedidos(ler()); });
+$('#exportar').addEventListener('click', exportar);
+$('#sair').addEventListener('click', () => { Auth.sair(); location.href = 'index.html'; });
+$('#gerar').addEventListener('click', gerarExemplos);
+
+$('#apagar').addEventListener('click', () => {
+    const n = ler().length;
+    if (!n) return aviso('Não há pedidos para apagar');
+    if (!confirm(`Apagar ${n} pedido${n > 1 ? 's' : ''}? Essa ação não pode ser desfeita.`)) return;
+    api('pedidos', { method: 'DELETE' })
+        .then(() => aviso('Pedidos apagados')).catch((err) => aviso(err.message)).then(carregar);
+});
+
+const mudarStatus = async (numero, status) => {
+    try {
+        await api('pedidos/' + encodeURIComponent(numero), { method: 'PATCH', body: JSON.stringify({ status }) });
+        aviso(`Pedido ${numero}: ${STATUS[status].toLowerCase()}`);
+    } catch (e) { aviso(e.message); }
+    await carregar();
+};
+
+document.addEventListener('change', (e) => {
+    const s = e.target.closest('select.status'); if (!s) return;
+    mudarStatus(s.dataset.num, s.value);
+    if (s.hasAttribute('data-no-detalhe')) s.dataset.s = s.value;
+});
+
+document.addEventListener('click', (e) => {
+    const ver = e.target.closest('[data-ver]');
+    if (ver) return abrirDetalhe(ver.dataset.ver);
+    if (e.target.closest('[data-fechar]')) return $('#detalhe').close();
+    if (e.target === $('#detalhe')) return $('#detalhe').close();
+
+    const ex = e.target.closest('[data-excluir]');
+    if (ex) {
+        if (!confirm('Excluir este pedido? Essa ação não pode ser desfeita.')) return;
+        api('pedidos/' + encodeURIComponent(ex.dataset.excluir), { method: 'DELETE' })
+            .then(() => aviso('Pedido excluído')).catch((err) => aviso(err.message)).then(carregar);
+        $('#detalhe').close(); return;
+    }
+    const ac = e.target.closest('[data-acao]');
+    if (!ac) return;
+    if (ac.dataset.acao === 'gerar') gerarExemplos();
+    if (ac.dataset.acao === 'ver-pagos') { ui.status = 'pago'; ui.periodo = 'all'; ui.limite = POR_PAGINA; render(); $('#t-ped').scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    if (ac.dataset.acao === 'remover-demo') api('pedidos?demo=1', { method: 'DELETE' }).then(() => aviso('Exemplos removidos')).catch((err) => aviso(err.message)).then(carregar);
+    if (ac.dataset.acao === 'recarregar') carregar();
+});
+
+// busca pedidos novos a cada 20 segundos (sem atrapalhar se o detalhe estiver aberto)
+setInterval(() => { if (!$('#detalhe').open && !document.hidden) carregar(); }, 20000);
+
+carregar();
+})();
+</script>
+</body>
+</html>

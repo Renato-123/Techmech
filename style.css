@@ -1,0 +1,1033 @@
+/* ==========================================================================
+   TECHMECH — style.css
+   Tema escuro premium · glassmorphism · aurora animada · cards 3D com
+   spotlight, borda de luz giratória, brilho (shine), selo de desconto,
+   revelação no scroll, botão com ripple e total responsividade.
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* --------------------------------------------------------------------------
+   1. PROPRIEDADES REGISTRADAS (permitem animar ângulos e posições em CSS)
+   -------------------------------------------------------------------------- */
+@property --angle {
+    syntax: '<angle>';
+    inherits: false;
+    initial-value: 0deg;
+}
+@property --shine {
+    syntax: '<percentage>';
+    inherits: false;
+    initial-value: -60%;
+}
+@property --glow-opacity {
+    syntax: '<number>';
+    inherits: false;
+    initial-value: 0;
+}
+
+/* --------------------------------------------------------------------------
+   2. VARIÁVEIS DE DESIGN
+   -------------------------------------------------------------------------- */
+:root {
+    /* cores base */
+    --bg-0: #05060a;
+    --bg-1: #0a0c14;
+    --bg-2: #10131f;
+    --surface: rgba(255, 255, 255, 0.045);
+    --surface-hover: rgba(255, 255, 255, 0.08);
+    --stroke: rgba(255, 255, 255, 0.09);
+    --stroke-strong: rgba(255, 255, 255, 0.18);
+
+    /* texto */
+    --text: #f2f4fa;
+    --text-soft: #a8afc4;
+    --text-faint: #6b7390;
+
+    /* acentos */
+    --accent: #7c5cff;
+    --accent-2: #00d4ff;
+    --accent-3: #ff3d81;
+    --green: #2dffa3;
+    --green-deep: #00c27a;
+    --danger: #ff4d6d;
+    --warn: #ffc24d;
+
+    /* gradientes */
+    --grad-brand: linear-gradient(120deg, var(--accent), var(--accent-2) 55%, var(--green));
+    --grad-hot: linear-gradient(120deg, var(--accent-3), var(--accent) 60%, var(--accent-2));
+    --grad-price: linear-gradient(120deg, var(--green), #b6ff6a);
+
+    /* medidas */
+    --radius: 22px;
+    --radius-sm: 12px;
+    --radius-pill: 999px;
+    --header-h: 86px;
+
+    /* sombras */
+    --shadow-1: 0 6px 18px rgba(0, 0, 0, 0.35);
+    --shadow-2: 0 24px 60px -12px rgba(0, 0, 0, 0.7);
+    --shadow-glow: 0 0 0 1px rgba(124, 92, 255, 0.35), 0 20px 70px -10px rgba(124, 92, 255, 0.45);
+
+    /* movimento */
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+    /* tipografia */
+    --font-display: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+    --font-body: 'Raleway', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+/* --------------------------------------------------------------------------
+   3. RESET E BASE
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    color-scheme: dark;
+}
+
+body {
+    position: relative;
+    min-height: 100vh;
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--text);
+    background:
+        radial-gradient(1200px 700px at 10% -10%, rgba(124, 92, 255, 0.16), transparent 60%),
+        radial-gradient(1000px 600px at 100% 0%, rgba(0, 212, 255, 0.10), transparent 60%),
+        linear-gradient(180deg, var(--bg-1), var(--bg-0));
+    background-attachment: fixed;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+button {
+    font: inherit;
+    color: inherit;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+::selection {
+    background: var(--accent);
+    color: #fff;
+}
+
+/* barra de rolagem personalizada */
+::-webkit-scrollbar {
+    width: 12px;
+}
+::-webkit-scrollbar-track {
+    background: var(--bg-0);
+}
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    border-radius: 10px;
+    border: 3px solid var(--bg-0);
+}
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, var(--accent-3), var(--accent));
+}
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) var(--bg-0);
+}
+
+/* --------------------------------------------------------------------------
+   4. FUNDO ANIMADO (aurora + grade + ruído)
+   -------------------------------------------------------------------------- */
+body::before,
+body::after {
+    content: '';
+    position: fixed;
+    z-index: -2;
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.55;
+    will-change: transform;
+}
+
+/* orbe roxa */
+body::before {
+    width: 55vmax;
+    height: 55vmax;
+    top: -20vmax;
+    left: -15vmax;
+    background: radial-gradient(circle at 30% 30%, rgba(124, 92, 255, 0.55), transparent 65%);
+    animation: aurora-a 22s var(--ease-in-out) infinite alternate;
+}
+
+/* orbe ciano / rosa */
+body::after {
+    width: 50vmax;
+    height: 50vmax;
+    right: -18vmax;
+    bottom: -22vmax;
+    background:
+        radial-gradient(circle at 60% 40%, rgba(0, 212, 255, 0.45), transparent 60%),
+        radial-gradient(circle at 30% 70%, rgba(255, 61, 129, 0.28), transparent 65%);
+    animation: aurora-b 26s var(--ease-in-out) infinite alternate;
+}
+
+@keyframes aurora-a {
+    0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50%  { transform: translate3d(18vw, 12vh, 0) scale(1.15) rotate(40deg); }
+    100% { transform: translate3d(6vw, 26vh, 0) scale(0.95) rotate(80deg); }
+}
+@keyframes aurora-b {
+    0%   { transform: translate3d(0, 0, 0) scale(1) rotate(0deg); }
+    50%  { transform: translate3d(-16vw, -14vh, 0) scale(1.2) rotate(-35deg); }
+    100% { transform: translate3d(-4vw, -28vh, 0) scale(1) rotate(-70deg); }
+}
+
+/* grade tecnológica + ruído sobre o fundo */
+.products-grid::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 30%, #000 20%, transparent 75%);
+    animation: grid-drift 40s linear infinite;
+}
+
+@keyframes grid-drift {
+    from { background-position: 0 0, 0 0; }
+    to   { background-position: 56px 56px, 56px 56px; }
+}
+
+/* --------------------------------------------------------------------------
+   5. BARRA DE PROGRESSO DE ROLAGEM + BRILHO DO CURSOR (criados pelo JS)
+   -------------------------------------------------------------------------- */
+.scroll-progress {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 100%;
+    height: 3px;
+    transform-origin: 0 50%;
+    transform: scaleX(var(--scroll, 0));
+    background: var(--grad-brand);
+    box-shadow: 0 0 14px var(--accent-2), 0 0 28px var(--accent);
+}
+
+.cursor-glow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+    width: 520px;
+    height: 520px;
+    margin: -260px 0 0 -260px;
+    pointer-events: none;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124, 92, 255, 0.18), rgba(0, 212, 255, 0.06) 45%, transparent 70%);
+    transform: translate3d(var(--cx, -999px), var(--cy, -999px), 0);
+    transition: opacity 0.4s ease;
+    mix-blend-mode: screen;
+    will-change: transform;
+}
+
+/* --------------------------------------------------------------------------
+   6. CABEÇALHO
+   -------------------------------------------------------------------------- */
+.topo-pagina {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-height: var(--header-h);
+    padding: 14px 24px;
+    text-align: center;
+    background: linear-gradient(180deg, rgba(10, 12, 20, 0.82), rgba(10, 12, 20, 0.55));
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border-bottom: 1px solid var(--stroke);
+    box-shadow: 0 10px 40px -20px rgba(0, 0, 0, 0.8);
+    animation: header-in 1s var(--ease) both;
+}
+
+/* linha de luz percorrendo a borda inferior */
+.topo-pagina::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), var(--green), transparent);
+    background-size: 220% 100%;
+    animation: line-run 5s linear infinite;
+    opacity: 0.9;
+}
+
+@keyframes header-in {
+    from { opacity: 0; transform: translateY(-100%); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes line-run {
+    from { background-position: 220% 0; }
+    to   { background-position: -220% 0; }
+}
+
+.title {
+    position: relative;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.4vw, 3.2rem);
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    line-height: 1;
+    background: linear-gradient(110deg, #ffffff 0%, var(--accent-2) 30%, var(--accent) 55%, var(--accent-3) 80%, #ffffff 100%);
+    background-size: 250% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    animation: title-shine 7s ease-in-out infinite;
+    filter: drop-shadow(0 0 18px rgba(124, 92, 255, 0.55));
+}
+
+.title b {
+    font-weight: inherit;
+}
+
+/* efeito glitch sutil que passa de vez em quando */
+.title::before,
+.title::after {
+    content: 'TECHMECH';
+    position: absolute;
+    inset: 0;
+    letter-spacing: inherit;
+    opacity: 0;
+    pointer-events: none;
+    -webkit-text-fill-color: currentColor;
+}
+.title::before {
+    color: var(--accent-3);
+    animation: glitch-a 9s steps(1) infinite;
+}
+.title::after {
+    color: var(--accent-2);
+    animation: glitch-b 9s steps(1) infinite;
+}
+
+@keyframes title-shine {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+}
+@keyframes glitch-a {
+    0%, 92%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+    93% { opacity: 0.8; transform: translate(-3px, 1px); clip-path: inset(10% 0 55% 0); }
+    95% { opacity: 0.8; transform: translate(3px, -1px); clip-path: inset(60% 0 8% 0); }
+    97% { opacity: 0; }
+}
+@keyframes glitch-b {
+    0%, 92%, 100% { opacity: 0; transform: translate(0, 0); clip-path: inset(0 0 0 0); }
+    94% { opacity: 0.8; transform: translate(3px, 1px); clip-path: inset(40% 0 30% 0); }
+    96% { opacity: 0.8; transform: translate(-3px, -1px); clip-path: inset(5% 0 70% 0); }
+    98% { opacity: 0; }
+}
+
+.resumo {
+    position: relative;
+    font-family: var(--font-body);
+    font-size: clamp(0.7rem, 1.3vw, 0.85rem);
+    font-weight: 600;
+    letter-spacing: 0.5em;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    animation: tracking-in 1.4s var(--ease) 0.3s both;
+}
+
+.resumo::before,
+.resumo::after {
+    content: '';
+    display: inline-block;
+    width: 38px;
+    height: 1px;
+    margin: 0 14px;
+    vertical-align: middle;
+    background: linear-gradient(90deg, transparent, var(--text-faint));
+}
+.resumo::after {
+    transform: scaleX(-1);
+}
+
+@keyframes tracking-in {
+    from { opacity: 0; letter-spacing: 1.2em; filter: blur(6px); }
+    to   { opacity: 1; letter-spacing: 0.5em; filter: blur(0); }
+}
+
+/* --------------------------------------------------------------------------
+   7. GRADE DE PRODUTOS
+   -------------------------------------------------------------------------- */
+.products-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 28px;
+    width: min(1480px, 100%);
+    margin: 0 auto;
+    padding: 56px clamp(16px, 3vw, 40px) 120px;
+    perspective: 1400px;
+}
+
+/* --------------------------------------------------------------------------
+   8. CARD DE PRODUTO
+   -------------------------------------------------------------------------- */
+.product-card {
+    --rx: 0deg;
+    --ry: 0deg;
+    --lift: 0px;
+    --mx: 50%;
+    --my: 50%;
+    --i: 0;
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--radius);
+    background:
+        linear-gradient(160deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.02) 55%),
+        rgba(14, 17, 28, 0.72);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    border: 1px solid var(--stroke);
+    box-shadow: var(--shadow-1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform-style: preserve-3d;
+    transform: rotateX(var(--rx)) rotateY(var(--ry)) translateY(var(--lift));
+    transition:
+        transform 0.45s var(--ease),
+        box-shadow 0.45s var(--ease),
+        border-color 0.45s var(--ease);
+    will-change: transform;
+}
+
+/* estado antes de aparecer no scroll */
+.product-card:not(.is-visible) {
+    opacity: 0;
+}
+.product-card.is-visible {
+    animation: card-in 0.9s var(--ease) calc(var(--i) * 55ms) backwards;
+}
+
+@keyframes card-in {
+    0%   { opacity: 0; transform: translateY(70px) rotateX(18deg) scale(0.92); filter: blur(10px); }
+    60%  { filter: blur(0); }
+    100% { opacity: 1; transform: translateY(0) rotateX(0) scale(1); }
+}
+
+/* borda de luz giratória */
+.product-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    padding: 1.5px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: conic-gradient(
+        from var(--angle),
+        transparent 0deg,
+        var(--accent) 50deg,
+        var(--accent-2) 100deg,
+        transparent 150deg,
+        transparent 210deg,
+        var(--accent-3) 260deg,
+        transparent 320deg
+    );
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    opacity: 0;
+    transition: opacity 0.5s var(--ease);
+    animation: spin-border 4.5s linear infinite;
+}
+
+@keyframes spin-border {
+    to { --angle: 360deg; }
+}
+
+/* spotlight que segue o mouse dentro do card */
+.product-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    border-radius: inherit;
+    background: radial-gradient(
+        420px circle at var(--mx) var(--my),
+        rgba(255, 255, 255, 0.14),
+        rgba(124, 92, 255, 0.10) 35%,
+        transparent 65%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+.product-card:hover {
+    --lift: -10px;
+    border-color: var(--stroke-strong);
+    box-shadow:
+        0 30px 60px -18px rgba(0, 0, 0, 0.8),
+        0 0 60px -10px rgba(124, 92, 255, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.product-card:hover::before,
+.product-card:hover::after {
+    opacity: 1;
+}
+
+.product-card:focus-within {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-glow);
+}
+
+/* reflexo (shine) varrendo o card */
+.card-shine {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    border-radius: inherit;
+    overflow: hidden;
+}
+.card-shine::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -60%;
+    width: 40%;
+    height: 140%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+    transform: skewX(-18deg);
+    opacity: 0;
+}
+.product-card:hover .card-shine::before {
+    animation: shine-sweep 1.1s var(--ease) 1;
+}
+@keyframes shine-sweep {
+    0%   { left: -60%; opacity: 0; }
+    20%  { opacity: 1; }
+    100% { left: 140%; opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   9. SELO DE DESCONTO
+   -------------------------------------------------------------------------- */
+.product-badge {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 6;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px 6px 10px;
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #fff;
+    background: var(--grad-hot);
+    border-radius: var(--radius-pill);
+    box-shadow: 0 8px 22px -6px rgba(255, 61, 129, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transform: translateZ(40px);
+    animation: badge-pulse 2.6s var(--ease-in-out) infinite;
+}
+.product-badge::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 10px #fff;
+    animation: blink 1.4s ease-in-out infinite;
+}
+
+@keyframes badge-pulse {
+    0%, 100% { box-shadow: 0 8px 22px -6px rgba(255, 61, 129, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+    50%      { box-shadow: 0 8px 34px -2px rgba(255, 61, 129, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+}
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.25; }
+}
+
+/* --------------------------------------------------------------------------
+   10. IMAGEM DO PRODUTO
+   -------------------------------------------------------------------------- */
+.product-image {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1 / 0.82;
+    margin: 10px 10px 0;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 8px);
+    background:
+        radial-gradient(circle at 50% 38%, #ffffff 0%, #eef1f8 55%, #d9deec 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5), inset 0 -30px 50px -30px rgba(40, 50, 100, 0.35);
+}
+
+/* carregando: brilho percorrendo */
+.product-image::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(100deg, transparent 20%, rgba(124, 92, 255, 0.12) 50%, transparent 80%);
+    background-size: 220% 100%;
+    animation: skeleton 1.8s linear infinite;
+}
+@keyframes skeleton {
+    from { background-position: 220% 0; }
+    to   { background-position: -220% 0; }
+}
+
+/* sombra de chão sob o produto */
+.product-image::after {
+    content: '';
+    position: absolute;
+    left: 18%;
+    right: 18%;
+    bottom: 8%;
+    height: 14px;
+    z-index: 0;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(20, 25, 60, 0.38), transparent 70%);
+    filter: blur(6px);
+    transition: transform 0.6s var(--ease), opacity 0.6s var(--ease);
+}
+.product-card:hover .product-image::after {
+    transform: scale(0.72);
+    opacity: 0.55;
+}
+
+.product-image img {
+    position: relative;
+    z-index: 1;
+    width: 88%;
+    height: 88%;
+    object-fit: contain;
+    mix-blend-mode: multiply;
+    background: transparent;
+    filter: drop-shadow(0 14px 18px rgba(25, 30, 70, 0.28));
+    transform: translateZ(30px) scale(1);
+    transition: transform 0.7s var(--ease), filter 0.7s var(--ease);
+}
+.product-card:hover .product-image img {
+    transform: translateZ(60px) scale(1.12) rotate(-2deg);
+    filter: drop-shadow(0 26px 26px rgba(25, 30, 70, 0.4));
+    animation: float 3.4s ease-in-out 0.5s infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateZ(60px) scale(1.12) rotate(-2deg) translateY(0); }
+    50%      { transform: translateZ(60px) scale(1.12) rotate(1deg) translateY(-8px); }
+}
+
+/* imagem que falhou ao carregar */
+.product-image.sem-imagem::before {
+    animation: none;
+    background: repeating-linear-gradient(45deg, #e4e8f2 0 12px, #dbe0ee 12px 24px);
+}
+.product-image.sem-imagem img {
+    opacity: 0;
+}
+.product-image.sem-imagem span {
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-display);
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #6b7390;
+}
+
+/* --------------------------------------------------------------------------
+   11. INFORMAÇÕES DO PRODUTO
+   -------------------------------------------------------------------------- */
+.product-info {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px 22px 24px;
+    transform: translateZ(20px);
+}
+
+.product-category {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    background: rgba(0, 212, 255, 0.08);
+    border: 1px solid rgba(0, 212, 255, 0.28);
+    border-radius: var(--radius-pill);
+    transition: background 0.4s ease, color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
+}
+.product-category::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    box-shadow: 0 0 8px currentColor;
+}
+.product-card:hover .product-category {
+    color: #fff;
+    background: rgba(0, 212, 255, 0.22);
+    border-color: var(--accent-2);
+    box-shadow: 0 0 22px -4px rgba(0, 212, 255, 0.6);
+}
+
+.product-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 2.5em;
+    font-family: var(--font-display);
+    font-size: 1.28rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    transition: color 0.4s ease, letter-spacing 0.5s var(--ease);
+}
+.product-card:hover .product-title {
+    color: #fff;
+    letter-spacing: 0.03em;
+}
+
+/* --------------------------------------------------------------------------
+   12. PREÇOS
+   -------------------------------------------------------------------------- */
+.product-price-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: auto;
+    padding-top: 10px;
+}
+
+.price-old {
+    position: relative;
+    align-self: flex-start;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-faint);
+}
+/* risco animado cortando o preço antigo */
+.price-old::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 52%;
+    height: 1.5px;
+    background: var(--danger);
+    transform-origin: 0 50%;
+    transform: scaleX(0) rotate(-3deg);
+    transition: transform 0.8s var(--ease) 0.3s;
+}
+.product-card.is-visible .price-old::after {
+    transform: scaleX(1) rotate(-3deg);
+}
+
+.price-current {
+    font-family: var(--font-display);
+    font-size: 1.95rem;
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: 0.01em;
+    background: var(--grad-price);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    filter: drop-shadow(0 0 14px rgba(45, 255, 163, 0.28));
+    transition: filter 0.5s ease, transform 0.5s var(--ease);
+    transform-origin: 0 50%;
+}
+.product-card:hover .price-current {
+    filter: drop-shadow(0 0 20px rgba(45, 255, 163, 0.6));
+    transform: scale(1.06);
+}
+
+/* --------------------------------------------------------------------------
+   13. BOTÃO COMPRAR
+   -------------------------------------------------------------------------- */
+.btn-buy {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 16px;
+    padding: 15px 22px;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(120deg, var(--accent), var(--accent-2), var(--accent));
+    background-size: 220% 100%;
+    border-radius: var(--radius-sm);
+    box-shadow:
+        0 12px 28px -10px rgba(124, 92, 255, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.18);
+    transition:
+        background-position 0.7s var(--ease),
+        transform 0.35s var(--ease-spring),
+        box-shadow 0.35s var(--ease);
+}
+
+/* ícone de carrinho desenhado em CSS puro */
+.btn-buy::before {
+    content: '';
+    width: 20px;
+    height: 20px;
+    flex: none;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.6-1.4 2.4A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7.5a2 2 0 0 0 1.8-1l3.6-6.5A1 1 0 0 0 20.5 4H5.2l-.9-2H1z'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM1 2v2h2l3.6 7.6-1.4 2.4A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7.5a2 2 0 0 0 1.8-1l3.6-6.5A1 1 0 0 0 20.5 4H5.2l-.9-2H1z'/%3E%3C/svg%3E") center / contain no-repeat;
+    transition: transform 0.5s var(--ease-spring);
+}
+
+/* brilho que atravessa o botão */
+.btn-buy::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -80%;
+    z-index: -1;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    transform: skewX(-22deg);
+    transition: left 0.8s var(--ease);
+}
+
+.btn-buy:hover {
+    background-position: 100% 0;
+    transform: translateY(-3px) scale(1.02);
+    box-shadow:
+        0 20px 40px -10px rgba(0, 212, 255, 0.7),
+        0 0 0 1px rgba(255, 255, 255, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.btn-buy:hover::before {
+    transform: translateX(-4px) rotate(-12deg) scale(1.15);
+}
+.btn-buy:hover::after {
+    left: 140%;
+}
+
+.btn-buy:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 6px 14px -6px rgba(124, 92, 255, 0.8), inset 0 2px 6px rgba(0, 0, 0, 0.3);
+    transition-duration: 0.1s;
+}
+
+.btn-buy:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 4px;
+}
+
+/* feedback depois do clique (classe adicionada pelo JS) */
+.btn-buy.added {
+    background: linear-gradient(120deg, var(--green-deep), var(--green));
+    box-shadow: 0 14px 30px -8px rgba(45, 255, 163, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    animation: added-pop 0.6s var(--ease-spring);
+}
+@keyframes added-pop {
+    0%   { transform: scale(0.94); }
+    50%  { transform: scale(1.06); }
+    100% { transform: scale(1); }
+}
+
+/* onda (ripple) criada pelo JS no ponto do clique */
+.ripple {
+    position: absolute;
+    z-index: -1;
+    width: 12px;
+    height: 12px;
+    margin: -6px 0 0 -6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+    animation: ripple 0.8s var(--ease) forwards;
+}
+@keyframes ripple {
+    to { transform: scale(38); opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   14. RESPONSIVIDADE
+   -------------------------------------------------------------------------- */
+@media (max-width: 1100px) {
+    .products-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 22px;
+    }
+}
+
+@media (max-width: 720px) {
+    :root {
+        --radius: 18px;
+        --header-h: 72px;
+    }
+    .products-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        padding: 28px 12px 80px;
+    }
+    .resumo {
+        letter-spacing: 0.3em;
+    }
+    @keyframes tracking-in {
+        from { opacity: 0; letter-spacing: 0.8em; filter: blur(6px); }
+        to   { opacity: 1; letter-spacing: 0.3em; filter: blur(0); }
+    }
+    .resumo::before,
+    .resumo::after {
+        width: 16px;
+        margin: 0 8px;
+    }
+    .product-info {
+        padding: 14px 14px 16px;
+        gap: 8px;
+    }
+    .product-title {
+        font-size: 1rem;
+    }
+    .price-current {
+        font-size: 1.4rem;
+    }
+    .btn-buy {
+        padding: 12px 10px;
+        font-size: 0.8rem;
+        letter-spacing: 0.08em;
+    }
+    .btn-buy::before {
+        display: none;
+    }
+    .product-badge {
+        top: 10px;
+        left: 10px;
+        font-size: 0.7rem;
+        padding: 4px 9px;
+    }
+    .cursor-glow {
+        display: none;
+    }
+}
+
+@media (max-width: 420px) {
+    .products-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* telas sem mouse: sem inclinação 3D nem spotlight */
+@media (hover: none) {
+    .product-card {
+        transform: none !important;
+    }
+    .product-card::after {
+        display: none;
+    }
+    .product-card:hover {
+        --lift: 0px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   15. ACESSIBILIDADE — respeita quem prefere menos movimento
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    .product-card:not(.is-visible) {
+        opacity: 1;
+    }
+}
+
+/* impressão: versão limpa */
+@media print {
+    body::before,
+    body::after,
+    .products-grid::before,
+    .cursor-glow,
+    .scroll-progress,
+    .btn-buy {
+        display: none !important;
+    }
+    body {
+        background: #fff;
+        color: #000;
+    }
+    .product-card {
+        break-inside: avoid;
+        box-shadow: none;
+        background: #fff;
+        border: 1px solid #ccc;
+    }
+}
